@@ -61,9 +61,12 @@ test-suite test
       test
   default-extensions:
       DeriveDataTypeable
+  build-tool-depends:
+      tasty-discover:tasty-discover
   build-depends:
       SafeSemaphore
     , base
+    , hspec
     , immortal
     , tasty
     , tasty-discover

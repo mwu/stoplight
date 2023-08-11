@@ -37,6 +37,9 @@ flags:
       Compile with -O0 for faster compile times.
       Disable for production builds.
 
+build-tools:
+  - tasty-discover:tasty-discover
+
 default-extensions:
   - DeriveDataTypeable
 
@@ -55,6 +58,7 @@ tests:
       - src
       - test
     dependencies:
+      - hspec
       - tasty
       - tasty-hspec
       - tasty-hunit

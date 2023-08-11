@@ -6,7 +6,7 @@ module BucketSpec where
 import           Control.Concurrent
 import           Control.Monad
 import           Data.IORef
-import           Test.Tasty.Hspec
+import           Test.Hspec
 import           Test.Tasty.HUnit
 -------------------------------------------------------------------------------
 import qualified Stoplight.Bucket   as T
