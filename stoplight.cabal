@@ -21,11 +21,6 @@ flag development
   manual: True
   default: False
 
-flag lib-Werror
-  description: Turn on -Wall and -Werror. Should always be enabled
-  manual: True
-  default: False
-
 library
   exposed-modules:
       Stoplight.Bucket
@@ -35,6 +30,7 @@ library
       src
   default-extensions:
       DeriveDataTypeable
+  ghc-options: -Wall -fwarn-redundant-constraints -Wincomplete-record-updates
   build-depends:
       SafeSemaphore
     , base
@@ -43,10 +39,6 @@ library
     cpp-options: -DDEVELOPMENT
   else
     cpp-options: -DNODEVELOPMENT
-  if flag(lib-Werror)
-    ghc-options: -Wall -Werror -fwarn-redundant-constraints -Wincomplete-record-updates
-  else
-    ghc-options: -Wall -fwarn-redundant-constraints -Wincomplete-record-updates
   default-language: Haskell2010
 
 test-suite test
@@ -61,10 +53,12 @@ test-suite test
       test
   default-extensions:
       DeriveDataTypeable
+  ghc-options: -Wall -fwarn-redundant-constraints -Wincomplete-record-updates -threaded "-with-rtsopts=-N -xn -A512M"
   build-tool-depends:
       tasty-discover:tasty-discover
   build-depends:
       SafeSemaphore
+    , atomic-primops
     , base
     , hspec
     , immortal
@@ -72,12 +66,9 @@ test-suite test
     , tasty-discover
     , tasty-hspec
     , tasty-hunit
+    , time
   if flag(development)
     cpp-options: -DDEVELOPMENT
   else
     cpp-options: -DNODEVELOPMENT
-  if flag(lib-Werror)
-    ghc-options: -Wall -Werror -fwarn-redundant-constraints -Wincomplete-record-updates
-  else
-    ghc-options: -Wall -fwarn-redundant-constraints -Wincomplete-record-updates
   default-language: Haskell2010

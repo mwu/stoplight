@@ -17,28 +17,14 @@ when:
       cpp-options: -DDEVELOPMENT
     else:
       cpp-options: -DNODEVELOPMENT
-  - condition: flag(lib-Werror)
-    then:
-      ghc-options:
-        - -Wall -Werror -fwarn-redundant-constraints -Wincomplete-record-updates
-    else:
-      ghc-options:
-        - -Wall -fwarn-redundant-constraints -Wincomplete-record-updates
 
 flags:
-  lib-Werror:
-    manual: true
-    default: false
-    description: "Turn on -Wall and -Werror. Should always be enabled"
   development:
     manual: true
     default: false
     description: >-
       Compile with -O0 for faster compile times.
       Disable for production builds.
-
-build-tools:
-  - tasty-discover:tasty-discover
 
 default-extensions:
   - DeriveDataTypeable
@@ -50,6 +36,8 @@ dependencies:
 
 library:
   source-dirs: src
+  ghc-options:
+    - -Wall -fwarn-redundant-constraints -Wincomplete-record-updates
 
 tests:
   test:
@@ -58,8 +46,14 @@ tests:
       - src
       - test
     dependencies:
+      - atomic-primops
       - hspec
       - tasty
       - tasty-hspec
       - tasty-hunit
       - tasty-discover
+      - time
+    build-tools:
+      - tasty-discover:tasty-discover
+    ghc-options:
+      - -Wall -fwarn-redundant-constraints -Wincomplete-record-updates -threaded "-with-rtsopts=-N -xn -A512M"

@@ -1,11 +1,13 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE NumericUnderscores #-}
 
 module BucketSpec where
 
 -------------------------------------------------------------------------------
 import           Control.Concurrent
 import           Control.Monad
-import           Data.IORef
+import qualified Data.Atomics.Counter as AC
+import           Data.Time.Clock as Time
 import           Test.Hspec
 import           Test.Tasty.HUnit
 -------------------------------------------------------------------------------
@@ -20,24 +22,27 @@ spec_throttle = parallel $ describe "throttle" $ do
         testThrottle tick regen
   where
     testThrottle tick regen =  do
-        i <- newIORef (0 :: Integer)
+        i <- AC.newCounter 0
         t <- T.new 0 50 tick regen
 
-        replicateM_ 20 $ forkIO $ forever $ do
+        replicateM_ 500 $ forkIO $ forever $ do
           T.wait t 1
-          atomicModifyIORef' i $ \ i' -> (i'+1, ())
+          AC.incrCounter_ 1 i
 
+        start <- Time.getCurrentTime
         -- wait a multiple of tick
-        let w = tick * 20
+        threadDelay (tick * 20)
+        end <- Time.getCurrentTime
 
-        threadDelay w
-        cnt <- readIORef i
+        let elapsedMicro = realToFrac (end `Time.diffUTCTime` start) * 1_000_000
+        cnt <- AC.readCounter i
 
-        let maxLim = (fromIntegral w / fromIntegral tick) * fromIntegral regen
+        let maxLim = (elapsedMicro / fromIntegral tick) * fromIntegral regen
             (cnt' :: Double) = fromIntegral cnt
 
         assertBool ("meets upperbound: " ++ show cnt') $ cnt' <= maxLim
-        assertBool ("meets lowerbound: " ++ show cnt') $ cnt' >= maxLim * 0.8
+        -- use a fudge factor of 70% to account for threadDelay delays
+        assertBool ("meets lowerbound: " ++ show cnt') $ cnt' >= maxLim * 0.7
 
 
 spec_overflow :: Spec
